@@ -1,0 +1,45 @@
+{
+  "name": "audio-transcoder",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Convert audio into different formats.",
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint 'src/**/*.js'",
+    "lint:format": "npm run lint -- --fix",
+    "sls:debug": "serverless print"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/upstandfm/audio-transcoder.git"
+  },
+  "author": "Daniël Illouz <daniel.illouz@me.com> (https://www.danillouz.dev/)",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/upstandfm/audio-transcoder/issues"
+  },
+  "homepage": "https://github.com/upstandfm/audio-transcoder#readme",
+  "lint-staged": {
+    "src/**/*.{js,json,md}": [
+      "npm run lint:format",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "devDependencies": {
+    "eslint": "^6.4.0",
+    "eslint-config-prettier": "^6.3.0",
+    "eslint-plugin-prettier": "^3.1.0",
+    "husky": "^3.0.5",
+    "jest": "^24.9.0",
+    "jest-junit": "^8.0.0",
+    "lint-staged": "^9.2.5",
+    "prettier": "^1.18.2",
+    "serverless": "^1.53.0"
+  },
+  "dependencies": {}
+}
