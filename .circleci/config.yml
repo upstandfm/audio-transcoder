@@ -1,0 +1,138 @@
+# YAML Anchors
+# These anchors can be aliased to prevent config repetition
+# For more info see:
+# https://medium.com/@kinghuang/docker-compose-anchors-aliases-extensions-a1e4105d70bd
+docker_image: &docker_image
+  docker:
+    - image: circleci/node:12.10.0
+
+# Caching, for more info see:
+# https://circleci.com/docs/2.0/caching/#section=projects
+#
+# Note that the CircleCI cache is immutable and there's not other way to
+# invalidate the cache besides using a different key. Therefore it's advised to
+# use some sort of version pre- or postfix in the key.
+#
+# For more info see:
+# https://circleci.com/docs/2.0/caching/#clearing-cache
+restore_deps_cache: &restore_deps_cache
+  restore_cache:
+    keys:
+      - npm-cache-v1-{{ checksum "package-lock.json" }}
+
+# Job filters, for more information see: https://circleci.com/docs/2.0/workflows/#branch-level-job-execution
+all_branches_except_master: &all_branches_except_master
+  filters:
+    branches:
+      ignore: master
+
+only_master: &only_master
+  filters:
+    branches:
+      only: master
+
+version: 2.1
+jobs:
+  audit:
+    <<: *docker_image
+    steps:
+      - checkout
+      - run:
+          name: Audit dependencies
+          command: npm audit
+
+  deps:
+    <<: *docker_image
+    steps:
+      - checkout
+      - *restore_deps_cache
+      - run:
+          name: Install dependencies
+          command: npm ci
+      - save_cache:
+          key: npm-cache-v1-{{ checksum "package-lock.json" }}
+
+          # Dir "node_modules" should not be cached, because it contains
+          # compiled binaries, which will cause errors when using different
+          # Node versions.
+          #
+          # The ".npm" dir also stores deps, but uncompiled.
+          #
+          # Additionally, some binaries/executables are stord in ".cache".
+          #
+          # For more info see:
+          # https://docs.cypress.io/guides/guides/continuous-integration.html#Caching
+          paths:
+            - ~/.npm
+            - ~/.cache
+
+  test:
+    <<: *docker_image
+    steps:
+      - checkout
+      - *restore_deps_cache
+      - run:
+          name: Install dependencies
+          command: npm ci
+      - run:
+          name: Run unit/integration tests
+          environment:
+            JEST_JUNIT_OUTPUT_DIR: 'reports/jest/test-report-junit.xml'
+
+          # For more info see:
+          # https://circleci.com/docs/2.0/collect-test-data/#jest
+          command: npm test -- --ci --runInBand --coverage --collectCoverageFrom='["src/**/*.{js}"]' --coverageDirectory reports/jest --reporters=default --reporters=jest-junit
+      - store_test_results:
+          path: reports
+      - store_artifacts:
+          path: reports
+
+  release:
+    <<: *docker_image
+    steps:
+      - checkout
+      - *restore_deps_cache
+      - run:
+          name: Install dependencies
+          command: npm ci
+      - run:
+          name: Release to prod
+          command: |
+            $(npm bin)/serverless deploy --region eu-central-1
+
+workflows:
+  build_branch:
+    jobs:
+      - audit:
+          <<: *all_branches_except_master
+      - deps:
+          <<: *all_branches_except_master
+          requires:
+            - audit
+      - test:
+          <<: *all_branches_except_master
+          requires:
+            - audit
+            - deps
+
+  release_master:
+    jobs:
+      - audit:
+          <<: *only_master
+      - deps:
+          <<: *only_master
+          requires:
+            - audit
+      - test:
+          <<: *only_master
+          requires:
+            - audit
+            - deps
+      - release:
+          # Contains Serverless Framework credentials
+          context: credentials
+          <<: *only_master
+          requires:
+            - audit
+            - deps
+            - test
