@@ -14,6 +14,10 @@ provider:
     name: upstandfm-deployments
     serverSideEncryption: AES256 # when using server-side encryption
   environment:
+    # Reuse TCP connection to reduce request latency
+    # For more info see:
+    # https://github.com/aws/aws-sdk-js/blob/master/CHANGELOG.md#24630
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
     # AWS Elastic Transcoder is not available in all regions
     ELASTIC_TRANSCODER_REGION: eu-west-1
     # The ARN has the format "arn:aws:elastictranscoder:::pipeline/pipelineId"
