@@ -13,8 +13,8 @@ module.exports = {
    * @return {Promise} Resolves with scheduled job data
    */
   scheduleJob(client, pipelineId, presetId, presetFileExtension, s3Key) {
-    // A key will look like:
-    // "audio/standups/:standupId/:date/:userId/today.webm"
+    // A valid S3 key will look like:
+    // "audio/standups/:standupId/DD-MM-YYYY/:userId/:filename.webm"
     const [type, entity, entityId, dateKey, userId, file] = s3Key.split('/');
     const [filename] = file.split('.');
 

@@ -16,6 +16,19 @@ const transcoderClient = new ElasticTranscoder({
 });
 
 /**
+ * Error handler.
+ *
+ * @param {Object} context - AWS Lambda context
+ * @param {Object} err - Error
+ */
+function _handleError(context, err) {
+  // Provided by Serverless Framework
+  if (context && context.captureError) {
+    context.captureError(err);
+  }
+}
+
+/**
  * Lambda SNS Topic subscriber that schedules an AWS Elastic Transcoder job to
  * convert an audio recording into m4a.
  *
@@ -48,19 +61,21 @@ module.exports.convertToM4a = async (event, context) => {
         continue;
       }
 
-      // An S3 Event Message is a JSON string!
+      // An SNS Event Message is a JSON string!
       const { Message } = Sns;
 
       if (!Message) {
-        console.log('No Sns Message in event record');
+        console.log('No SNS Message in event record');
         continue;
       }
 
       let msg;
+
       try {
         msg = JSON.parse(Message);
       } catch (err) {
-        console.log('Invalid Sns Message');
+        console.log('Invalid SNS Message');
+        _handleError(context, err);
         continue;
       }
 
@@ -83,6 +98,7 @@ module.exports.convertToM4a = async (event, context) => {
         }
 
         let s3Key;
+
         if (s3.object && s3.object.key) {
           // Keys are sent as URI encoded strings
           // If keys are not decoded, they will not be found in their buckets
@@ -104,10 +120,6 @@ module.exports.convertToM4a = async (event, context) => {
     }
   } catch (err) {
     console.log('transcode to m4a failed ', err);
-
-    // Provided by Serverless Framework
-    if (context && context.captureError) {
-      context.captureError(err);
-    }
+    _handleError(context, err);
   }
 };

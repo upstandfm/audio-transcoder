@@ -9,8 +9,6 @@ module.exports = {
    * @throws {Error} Validation Error
    */
   standupAudioRecording(s3Key) {
-    console.log('validating S3 key: ', s3Key);
-
     // A valid S3 key looks like:
     // "audio/standups/:standupId/DD-MM-YYYY/:userId/:filename.webm"
     const isValid = /^audio\/standups\/.+\/\d\d?-\d\d?-\d\d\d\d\/.+\/\w+\.webm/.test(
@@ -18,6 +16,7 @@ module.exports = {
     );
 
     if (!isValid) {
+      console.log('invalid S3 key: ', s3Key);
       throw new Error(
         'Invalid S3 key, format must be "audio/standups/:standupId/DD-MM-YYYY/:userId/:filename.webm"'
       );
