@@ -14,7 +14,41 @@ provider:
     name: upstandfm-deployments
     serverSideEncryption: AES256 # when using server-side encryption
   environment:
-    #
+    # AWS Elastic Transcoder is not available in all regions
+    ELASTIC_TRANSCODER_REGION: eu-west-1
+    # The ARN has the format "arn:aws:elastictranscoder:::pipeline/pipelineId"
+    # Splitting on "/" gives us the pipeline ID
+    TRANSCODE_AUDIO_RECORDINGS_PIPELINE_ID:
+      'Fn::Select':
+        [
+          '1',
+          {
+            'Fn::Split':
+              ['/', '${secrets:TRANSCODE_AUDIO_RECORDINGS_PIPELINE_ARN}'],
+          },
+        ]
+    # The ARN has the format "arn:aws:elastictranscoder:::preset/presetId"
+    # Splitting on "/" gives us the preset ID
+    TRANSCODER_AAC_64_PRESET_ID:
+      'Fn::Select':
+        [
+          '1',
+          {
+            'Fn::Split': ['/', '${secrets:TRANSCODER_PRESET_AUDIO_AAC_64_ARN}'],
+          },
+        ]
+    TRANSCODER_AAC_64_PRESET_FILE_EXTENSION: m4a
+
+  # See: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_actions-resources-contextkeys.html
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - elastictranscoder:CreateJob
+      Resource:
+        - ${secrets:TRANSCODE_AUDIO_RECORDINGS_PIPELINE_ARN}
+        - ${secrets:TRANSCODER_PRESET_AUDIO_AAC_64_ARN}
+        - ${secrets:TRANSCODER_PRESET_AUDIO_AAC_128_ARN}
+        - ${secrets:TRANSCODER_PRESET_AUDIO_MP3_128_ARN}
 
 package:
   exclude:
@@ -25,4 +59,8 @@ package:
     - src
 
 functions:
-  #
+  elasticTranscoderToM4a:
+    handler: src/elastic-transcoder.convertToM4a
+    decription: Schedules an AWS Elastic Transcoder job to convert an audio recording into m4a
+    events:
+      - sns: ${state:infra.newS3AudioRecordingTopicArn}
