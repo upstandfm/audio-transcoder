@@ -42,6 +42,20 @@ provider:
           },
         ]
     TRANSCODER_AAC_64_PRESET_FILE_EXTENSION: m4a
+    # The ARN has the format "arn:aws:s3:::bucketName"
+    # Splitting on ":::" gives us the name
+    S3_RECORDINGS_BUCKET_NAME:
+      'Fn::Select':
+        ['1', { 'Fn::Split': [':::', '${state:infra.recordingsBucketArn}'] }]
+    S3_TRANSCODED_RECORDINGS_BUCKET_NAME:
+      'Fn::Select':
+        [
+          '1',
+          {
+            'Fn::Split':
+              [':::', '${state:infra.transcodedRecordingsBucketArn}'],
+          },
+        ]
 
   # See: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_actions-resources-contextkeys.html
   iamRoleStatements:
@@ -53,6 +67,19 @@ provider:
         - ${secrets:TRANSCODER_PRESET_AUDIO_AAC_64_ARN}
         - ${secrets:TRANSCODER_PRESET_AUDIO_AAC_128_ARN}
         - ${secrets:TRANSCODER_PRESET_AUDIO_MP3_128_ARN}
+    - Effect: Allow
+      Action:
+        - s3:GetObject
+      # MUST contain "/*" because resource type is "object"
+      Resource:
+        'Fn::Join': ['/', ['${state:infra.recordingsBucketArn}', '*']]
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+      # MUST contain "/*" because resource type is "object"
+      Resource:
+        'Fn::Join':
+          ['/', ['${state:infra.transcodedRecordingsBucketArn }', '*']]
 
 package:
   exclude:
@@ -68,3 +95,12 @@ functions:
     decription: Schedules an AWS Elastic Transcoder job to convert an audio recording into m4a
     events:
       - sns: ${state:infra.newS3AudioRecordingTopicArn}
+  ffmpegToMp3:
+    memorySize: 128
+    timeout: 180
+    handler: src/consumers.ffmpegToMp3
+    decription: Transcodes an audio recording into mp3 using FFmpeg
+    events:
+      - sns: ${state:infra.newS3AudioRecordingTopicArn}
+    layers:
+      - ${state:lambda-layers.ffmpegArn}
