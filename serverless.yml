@@ -96,8 +96,8 @@ functions:
     events:
       - sns: ${state:infra.newS3AudioRecordingTopicArn}
   ffmpegToMp3:
-    memorySize: 128
-    timeout: 180
+    memorySize: 2048
+    timeout: 10
     handler: src/consumers.ffmpegToMp3
     decription: Transcodes an audio recording into mp3 using FFmpeg
     events:
