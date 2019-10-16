@@ -11,7 +11,7 @@ module.exports = {
    *
    * @return {Object} Transcoded mp3 blob
    */
-  convertToMp3(webmBlob) {
+  convertWebmToMp3(webmBlob) {
     const now = Date.now();
     const input = `/tmp/${now}.webm`;
     const output = `/tmp/${now}.mp3`;

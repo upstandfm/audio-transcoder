@@ -26,7 +26,7 @@ function _handleError(context, err) {
 }
 
 /**
- * Lambda SNS Topic subscriber that transcodes an audio recording into mp3
+ * Lambda SNS Topic subscriber that transcodes a WebM audio recording o mp3
  * using FFmpeg.
  *
  * The SNS Topic trigger is an S3 notification.
@@ -41,7 +41,7 @@ function _handleError(context, err) {
  * https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-context.html
  *
  */
-module.exports.ffmpegToMp3 = async (event, context) => {
+module.exports.ffmpegWebmToMp3 = async (event, context) => {
   try {
     const { Records } = event;
 
@@ -82,7 +82,7 @@ module.exports.ffmpegToMp3 = async (event, context) => {
       const { Records: MsgRecords } = msg;
 
       if (!MsgRecords || !MsgRecords.length) {
-        console.log('No Message Records');
+        console.log('No S3 event Records');
         continue;
       }
 
@@ -104,13 +104,18 @@ module.exports.ffmpegToMp3 = async (event, context) => {
 
         validateS3Key.standupAudioRecording(s3Key);
 
-        const recordingsObject = await recordings.getObject(
+        const webmRecording = await recordings.getObject(
           s3Client,
           S3_RECORDINGS_BUCKET_NAME,
           s3Key
         );
 
-        const mp3Blob = ffmpeg.convertToMp3(recordingsObject.Body, s3Key);
+        if (!webmRecording || !webmRecording.Body) {
+          console.log('No recording object found for key: ', s3Key);
+          continue;
+        }
+
+        const mp3Blob = ffmpeg.convertWebmToMp3(webmRecording.Body, s3Key);
 
         // A valid S3 key will look like:
         // "audio/standups/:standupId/DD-MM-YYYY/:userId/:filename.webm"
