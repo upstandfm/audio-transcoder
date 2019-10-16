@@ -1,6 +1,7 @@
 'use strict';
 
 const S3 = require('aws-sdk/clients/s3');
+const processMessages = require('./process-messages');
 const validateS3Key = require('./validate-s3-key');
 const recordings = require('./recordings');
 const ffmpeg = require('./ffmpeg');
@@ -43,95 +44,52 @@ function _handleError(context, err) {
  */
 module.exports.ffmpegWebmToMp3 = async (event, context) => {
   try {
-    const { Records } = event;
+    console.log('event: ', JSON.stringify(event));
 
-    if (!Records || !Records.length) {
-      console.log('No event Records');
-      return;
-    }
-
-    for (const Record of Records) {
-      const { Sns } = Record;
-
-      if (!Sns) {
-        console.log('Not an SNS event');
-        continue;
-      }
-
-      // An SNS Event Message is a JSON string!
-      const { Message } = Sns;
-
-      if (!Message) {
-        console.log('No SNS Message in event record');
-        continue;
-      }
-
-      let msg;
-
-      try {
-        msg = JSON.parse(Message);
-      } catch (err) {
-        console.log('Invalid SNS Message');
+    await processMessages.forEverySnsS3Record(event, async (err, s3) => {
+      if (err) {
+        // Failed to process SNS S3 event record
         _handleError(context, err);
-        continue;
+        return;
       }
 
-      // An S3 Event message contains a "Records" list!
-      // For more info see:
-      // https://docs.aws.amazon.com/AmazonS3/latest/dev/notification-content-structure.html
-      const { Records: MsgRecords } = msg;
+      let s3Key;
 
-      if (!MsgRecords || !MsgRecords.length) {
-        console.log('No S3 event Records');
-        continue;
+      if (s3.object && s3.object.key) {
+        // Keys are sent as URI encoded strings
+        // If keys are not decoded, they will not be found in their buckets
+        s3Key = decodeURIComponent(s3.object.key);
       }
 
-      for (const MsgRecord of MsgRecords) {
-        const { s3 } = MsgRecord;
+      validateS3Key.standupAudioRecording(s3Key);
 
-        if (!s3) {
-          console.log('Not an S3 event');
-          continue;
-        }
+      const webmRecording = await recordings.getObject(
+        s3Client,
+        S3_RECORDINGS_BUCKET_NAME,
+        s3Key
+      );
 
-        let s3Key;
-
-        if (s3.object && s3.object.key) {
-          // Keys are sent as URI encoded strings
-          // If keys are not decoded, they will not be found in their buckets
-          s3Key = decodeURIComponent(s3.object.key);
-        }
-
-        validateS3Key.standupAudioRecording(s3Key);
-
-        const webmRecording = await recordings.getObject(
-          s3Client,
-          S3_RECORDINGS_BUCKET_NAME,
-          s3Key
-        );
-
-        if (!webmRecording || !webmRecording.Body) {
-          console.log('No recording object found for key: ', s3Key);
-          continue;
-        }
-
-        const mp3Blob = ffmpeg.convertWebmToMp3(webmRecording.Body, s3Key);
-
-        // A valid S3 key will look like:
-        // "audio/standups/:standupId/DD-MM-YYYY/:userId/:filename.webm"
-        const outputKey = s3Key.replace('webm', 'mp3');
-
-        await recordings.putObject(
-          s3Client,
-          S3_TRANSCODED_RECORDINGS_BUCKET_NAME,
-          outputKey,
-          'audio/mpeg',
-          mp3Blob
-        );
+      if (!webmRecording || !webmRecording.Body) {
+        console.log('No recording object found for key: ', s3Key);
+        return;
       }
-    }
+
+      const mp3Blob = ffmpeg.convertWebmToMp3(webmRecording.Body, s3Key);
+
+      // A valid S3 key will look like:
+      // "audio/standups/:standupId/DD-MM-YYYY/:userId/:filename.webm"
+      const outputKey = s3Key.replace('webm', 'mp3');
+
+      await recordings.putObject(
+        s3Client,
+        S3_TRANSCODED_RECORDINGS_BUCKET_NAME,
+        outputKey,
+        'audio/mpeg',
+        mp3Blob
+      );
+    });
   } catch (err) {
-    console.log('transcode to mp3 failed ', err);
+    // Failed to transcode WebM to mp3
     _handleError(context, err);
   }
 };
