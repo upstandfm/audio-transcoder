@@ -35,7 +35,7 @@ function _handleError(context, err) {
 }
 
 /**
- * Lambda SNS Topic subscriber that transcodes a WebM audio recording o mp3
+ * Lambda SNS Topic subscriber that transcodes a WebM audio recording to mp3
  * using FFmpeg.
  *
  * The SNS Topic trigger is an S3 notification.
@@ -138,18 +138,58 @@ module.exports.createRecording = async (event, context) => {
 
       validateS3Key.standupAudioRecording(s3Key);
 
-      // A valid S3 key looks like:
-      // "audio/standups/:standupId/DD-MM-YYYY/:userId/:filename.webm"
-      const [, , standupId, dateKey, userId, file] = s3Key.split('/');
-      const [filename] = file.split('.');
-
       await recordings.createItem(
         documentClient,
         DYNAMODB_STANDUPS_TABLE_NAME,
-        standupId,
-        dateKey,
-        userId,
-        filename
+        s3Key
+      );
+    });
+  } catch (err) {
+    // Failed to create recording item with status
+    _handleError(context, err);
+  }
+};
+
+/**
+ * Lambda SNS Topic subscriber that updates a recording item in DB.
+ *
+ * The SNS Topic trigger is an S3 notification.
+ *
+ * @param {Object} event - SNS message event
+ * @param {Object} context - AWS lambda context
+ *
+ * For more info on SNS message see:
+ * https://docs.aws.amazon.com/lambda/latest/dg/with-sns.html
+ *
+ * For more info on AWS lambda context see:
+ * https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-context.html
+ *
+ */
+module.exports.updateRecording = async (event, context) => {
+  try {
+    console.log('event: ', JSON.stringify(event));
+
+    await processMessages.forEverySnsS3Record(event, async (err, s3) => {
+      if (err) {
+        // Failed to process SNS S3 event records
+        _handleError(context, err);
+        return;
+      }
+
+      let s3Key;
+
+      if (s3.object && s3.object.key) {
+        // Keys are sent as URI encoded strings
+        // If keys are not decoded, they will not be found in their buckets
+        s3Key = decodeURIComponent(s3.object.key);
+      }
+
+      validateS3Key.standupTranscodedAudioRecording(s3Key);
+
+      await recordings.updateItem(
+        documentClient,
+        DYNAMODB_STANDUPS_TABLE_NAME,
+        s3Key
       );
     });
   } catch (err) {
