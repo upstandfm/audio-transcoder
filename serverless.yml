@@ -56,6 +56,7 @@ provider:
     - Effect: Allow
       Action:
         - dynamodb:PutItem
+        - dynamodb:UpdateItem
       Resource: ${state:infra.standupsTableArn}
 
 package:
@@ -81,3 +82,8 @@ functions:
     description: Creates a recording item in DB
     events:
       - sns: ${state:infra.newS3AudioRecordingTopicArn}
+  updateRecording:
+    handler: src/consumers.updateRecording
+    description: Updates a recording item in DB
+    events:
+      - sns: ${state:infra.newS3TranscodedAudioRecordingTopicArn}

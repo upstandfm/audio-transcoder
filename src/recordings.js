@@ -55,17 +55,19 @@ module.exports = {
    *
    * @param {Object} client - DynamoDB document client
    * @param {String} tableName - Name of the DynamoDB Table
-   * @param {String} standupId
-   * @param {String} dateKey - Date with format DD-MM-YYY
-   * @param {String} userId
-   * @param {String} filename
+   * @param {String} s3Key - S3 storage key (i.e. the storage "path")
    *
    * @return {Promise} Resolves with DynamoDB Object data
    *
    * For more information see:
    * https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#put-property
    */
-  createItem(client, tableName, standupId, dateKey, userId, filename) {
+  createItem(client, tableName, s3Key) {
+    // A valid S3 key looks like:
+    // "audio/standups/:standupId/DD-MM-YYYY/:userId/:filename.webm"
+    const [, , standupId, dateKey, userId, file] = s3Key.split('/');
+    const [filename] = file.split('.');
+
     const recordingId = shortid.generate();
     const now = Date.now();
     const params = {
@@ -85,5 +87,45 @@ module.exports = {
     };
 
     return client.put(params).promise();
+  },
+
+  /**
+   * Update a recording item.
+   *
+   * @param {Object} client - DynamoDB document client
+   * @param {String} tableName - Name of the DynamoDB Table
+   * @param {String} s3Key - S3 storage key (i.e. the storage "path")
+   *
+   * @return {Promise} Resolves with DynamoDB Object data
+   *
+   * For more information see:
+   * https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#put-property
+   */
+  updateItem(client, tableName, s3Key) {
+    // A valid S3 key looks like:
+    // "audio/standups/:standupId/DD-MM-YYYY/:userId/:filename.mp3"
+    const [, , standupId, dateKey, userId, file] = s3Key.split('/');
+    const [filename] = file.split('.');
+
+    const params = {
+      TableName: tableName,
+      Key: {
+        pk: `standup#${standupId}`,
+        sk: `update#${dateKey}#user#${userId}#recording#${filename}`
+      },
+      ExpressionAttributeNames: {
+        '#ua': 'updatedAt',
+        '#s': 'status',
+        '#k': 'transcodedFileKey'
+      },
+      ExpressionAttributeValues: {
+        ':ua': Date.now(),
+        ':s': 'completed',
+        ':k': s3Key
+      },
+      UpdateExpression: 'set #ua = :ua, #s = :s, #k = :k'
+    };
+
+    return client.update(params).promise();
   }
 };
