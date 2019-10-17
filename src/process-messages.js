@@ -13,7 +13,10 @@ module.exports = {
    * For more info on SNS message see:
    * https://docs.aws.amazon.com/lambda/latest/dg/with-sns.html
    *
-   * The "asyncCb" is called with an "err" object or "s3" object.
+   * The "asyncCb" is called with an "err" object, or no "err" and "s3" object:
+   *
+   * - With error: asyncCb(err)
+   * - With S3 Object: asyncCb(null, s3)
    */
   async forEverySnsS3Record(event, asyncCb) {
     if (!event) {

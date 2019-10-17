@@ -104,7 +104,7 @@ module.exports.ffmpegWebmToMp3 = async (event, context) => {
 
 /**
  * Lambda SNS Topic subscriber that creates a recording item in DB when
- * transcoding starts.
+ * a new audio recording is available.
  *
  * The SNS Topic trigger is an S3 notification.
  *
@@ -124,7 +124,7 @@ module.exports.createRecording = async (event, context) => {
 
     await processMessages.forEverySnsS3Record(event, async (err, s3) => {
       if (err) {
-        // Failed to process SNS S3 event records
+        // Failed to process SNS S3 event record
         _handleError(context, err);
         return;
       }
@@ -146,14 +146,14 @@ module.exports.createRecording = async (event, context) => {
       );
     });
   } catch (err) {
-    // Failed to create recording item with status
+    // Failed to create recording item
     _handleError(context, err);
   }
 };
 
 /**
- * Lambda SNS Topic subscriber that updates a recording item in DB when
- * trancoding completes.
+ * Lambda SNS Topic subscriber that updates a recording item in DB when a new
+ * transcoded audio recording is available.
  *
  * The SNS Topic trigger is an S3 notification.
  *
@@ -173,7 +173,7 @@ module.exports.updateRecordingStatusAndKey = async (event, context) => {
 
     await processMessages.forEverySnsS3Record(event, async (err, s3) => {
       if (err) {
-        // Failed to process SNS S3 event records
+        // Failed to process SNS S3 event record
         _handleError(context, err);
         return;
       }
@@ -195,7 +195,7 @@ module.exports.updateRecordingStatusAndKey = async (event, context) => {
       );
     });
   } catch (err) {
-    // Failed to create recording item with status
+    // Failed to update recording item status + key
     _handleError(context, err);
   }
 };
