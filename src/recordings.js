@@ -51,7 +51,7 @@ module.exports = {
   },
 
   /**
-   * Create a recording item when transcoding starts.
+   * Create a recording item.
    *
    * @param {Object} client - DynamoDB document client
    * @param {String} tableName - Name of the DynamoDB Table
@@ -90,7 +90,7 @@ module.exports = {
   },
 
   /**
-   * Update a recording item status and key when transcoding completes.
+   * Update a recording item status and key.
    *
    * @param {Object} client - DynamoDB document client
    * @param {String} tableName - Name of the DynamoDB Table
