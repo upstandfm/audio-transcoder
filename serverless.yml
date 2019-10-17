@@ -32,6 +32,11 @@ provider:
               [':::', '${state:infra.transcodedRecordingsBucketArn}'],
           },
         ]
+    # The ARN has the format "arn:aws:dynamodb:::table/tableName"
+    # Splitting on "/" gives us the name
+    DYNAMODB_STANDUPS_TABLE_NAME:
+      'Fn::Select':
+        ['1', { 'Fn::Split': ['/', '${state:infra.standupsTableArn}'] }]
 
   # See: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_actions-resources-contextkeys.html
   iamRoleStatements:
@@ -48,6 +53,10 @@ provider:
       Resource:
         'Fn::Join':
           ['/', ['${state:infra.transcodedRecordingsBucketArn }', '*']]
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+      Resource: ${state:infra.standupsTableArn}
 
 package:
   exclude:
@@ -62,8 +71,13 @@ functions:
     memorySize: 2048
     timeout: 10
     handler: src/consumers.ffmpegWebmToMp3
-    decription: Transcodes a WebM audio recording to mp3 using FFmpeg
+    description: Transcodes a WebM audio recording to mp3 using FFmpeg
     events:
       - sns: ${state:infra.newS3AudioRecordingTopicArn}
     layers:
       - ${state:lambda-layers.ffmpegArn}
+  createRecording:
+    handler: src/consumers.createRecording
+    description: Creates a recording item in DB
+    events:
+      - sns: ${state:infra.newS3AudioRecordingTopicArn}
