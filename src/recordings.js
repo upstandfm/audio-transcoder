@@ -1,5 +1,7 @@
 'use strict';
 
+const shortid = require('shortid');
+
 module.exports = {
   /**
    * Get an Object from an S3 bucket.
@@ -46,5 +48,42 @@ module.exports = {
     };
 
     return client.putObject(params).promise();
+  },
+
+  /**
+   * Create a recording item.
+   *
+   * @param {Object} client - DynamoDB document client
+   * @param {String} tableName - Name of the DynamoDB Table
+   * @param {String} standupId
+   * @param {String} dateKey - Date with format DD-MM-YYY
+   * @param {String} userId
+   * @param {String} filename
+   *
+   * @return {Promise} Resolves with DynamoDB Object data
+   *
+   * For more information see:
+   * https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#put-property
+   */
+  createItem(client, tableName, standupId, dateKey, userId, filename) {
+    const recordingId = shortid.generate();
+    const now = Date.now();
+    const params = {
+      TableName: tableName,
+      Item: {
+        pk: `standup#${standupId}`,
+        sk: `update#${dateKey}#user#${userId}#recording#${filename}`,
+        recordingId,
+        standupId,
+        userId,
+        filename,
+        createdAt: now,
+        updatedAt: now,
+        status: 'transcoding',
+        transcodedFileKey: ''
+      }
+    };
+
+    return client.put(params).promise();
   }
 };
