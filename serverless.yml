@@ -79,11 +79,11 @@ functions:
       - ${state:lambda-layers.ffmpegArn}
   createRecording:
     handler: src/consumers.createRecording
-    description: Creates a recording item in DB
+    description: Creates a recording item in DB when transcoding starts
     events:
       - sns: ${state:infra.newS3AudioRecordingTopicArn}
-  updateRecording:
+  updateRecordingStatusAndKey:
     handler: src/consumers.updateRecording
-    description: Updates a recording item in DB
+    description: Updates a recording item in DB when trancoding completes
     events:
       - sns: ${state:infra.newS3TranscodedAudioRecordingTopicArn}

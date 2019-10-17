@@ -103,7 +103,8 @@ module.exports.ffmpegWebmToMp3 = async (event, context) => {
 };
 
 /**
- * Lambda SNS Topic subscriber that creates a recording item in DB.
+ * Lambda SNS Topic subscriber that creates a recording item in DB when
+ * transcoding starts.
  *
  * The SNS Topic trigger is an S3 notification.
  *
@@ -151,7 +152,8 @@ module.exports.createRecording = async (event, context) => {
 };
 
 /**
- * Lambda SNS Topic subscriber that updates a recording item in DB.
+ * Lambda SNS Topic subscriber that updates a recording item in DB when
+ * trancoding completes.
  *
  * The SNS Topic trigger is an S3 notification.
  *
@@ -165,7 +167,7 @@ module.exports.createRecording = async (event, context) => {
  * https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-context.html
  *
  */
-module.exports.updateRecording = async (event, context) => {
+module.exports.updateRecordingStatusAndKey = async (event, context) => {
   try {
     console.log('event: ', JSON.stringify(event));
 
@@ -186,7 +188,7 @@ module.exports.updateRecording = async (event, context) => {
 
       validateS3Key.standupTranscodedAudioRecording(s3Key);
 
-      await recordings.updateItem(
+      await recordings.updateItemStatusAndKey(
         documentClient,
         DYNAMODB_STANDUPS_TABLE_NAME,
         s3Key

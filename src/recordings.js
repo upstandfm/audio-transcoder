@@ -51,7 +51,7 @@ module.exports = {
   },
 
   /**
-   * Create a recording item.
+   * Create a recording item when transcoding starts.
    *
    * @param {Object} client - DynamoDB document client
    * @param {String} tableName - Name of the DynamoDB Table
@@ -90,7 +90,7 @@ module.exports = {
   },
 
   /**
-   * Update a recording item.
+   * Update a recording item status and key when transcoding completes.
    *
    * @param {Object} client - DynamoDB document client
    * @param {String} tableName - Name of the DynamoDB Table
@@ -99,9 +99,9 @@ module.exports = {
    * @return {Promise} Resolves with DynamoDB Object data
    *
    * For more information see:
-   * https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#put-property
+   * https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#update-property
    */
-  updateItem(client, tableName, s3Key) {
+  updateItemStatusAndKey(client, tableName, s3Key) {
     // A valid S3 key looks like:
     // "audio/standups/:standupId/DD-MM-YYYY/:userId/:filename.mp3"
     const [, , standupId, dateKey, userId, file] = s3Key.split('/');
