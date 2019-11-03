@@ -82,7 +82,7 @@ module.exports.ffmpegWebmToMp3 = async (event, context) => {
         return;
       }
 
-      const mp3Blob = ffmpeg.convertWebmToMp3(webmRecording.Body, s3Key);
+      const mp3Blob = ffmpeg.convertWebmToMp3(webmRecording.Body);
 
       // A valid S3 key will look like:
       // "audio/standups/:standupId/DD-MM-YYYY/:userId/:filename.webm"
