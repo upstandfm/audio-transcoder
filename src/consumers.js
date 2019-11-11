@@ -52,8 +52,6 @@ function _handleError(context, err) {
  */
 module.exports.ffmpegWebmToMp3 = async (event, context) => {
   try {
-    console.log('event: ', JSON.stringify(event));
-
     await processMessages.forEverySnsS3Record(event, async (err, s3) => {
       if (err) {
         // Failed to process SNS S3 event record
@@ -120,8 +118,6 @@ module.exports.ffmpegWebmToMp3 = async (event, context) => {
  */
 module.exports.createRecording = async (event, context) => {
   try {
-    console.log('event: ', JSON.stringify(event));
-
     await processMessages.forEverySnsS3Record(event, async (err, s3) => {
       if (err) {
         // Failed to process SNS S3 event record
@@ -169,8 +165,6 @@ module.exports.createRecording = async (event, context) => {
  */
 module.exports.updateRecordingStatusAndKey = async (event, context) => {
   try {
-    console.log('event: ', JSON.stringify(event));
-
     await processMessages.forEverySnsS3Record(event, async (err, s3) => {
       if (err) {
         // Failed to process SNS S3 event record
