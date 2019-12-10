@@ -1,7 +1,5 @@
 'use strict';
 
-const shortid = require('shortid');
-
 module.exports = {
   /**
    * Get an Object from an S3 bucket.
@@ -68,14 +66,13 @@ module.exports = {
     const [, , standupId, dateKey, userId, file] = s3Key.split('/');
     const [filename] = file.split('.');
 
-    const recordingId = shortid.generate();
     const now = Date.now();
     const params = {
       TableName: tableName,
       Item: {
         pk: `standup#${standupId}`,
         sk: `update#${dateKey}#user#${userId}#recording#${filename}`,
-        recordingId,
+        recordingId: filename,
         standupId,
         userId,
         filename,

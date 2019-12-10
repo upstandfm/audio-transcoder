@@ -41,7 +41,5 @@
     "prettier": "^1.19.1",
     "serverless": "^1.59.3"
   },
-  "dependencies": {
-    "shortid": "^2.2.15"
-  }
+  "dependencies": {}
 }
