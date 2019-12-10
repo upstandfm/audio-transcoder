@@ -74,13 +74,11 @@ describe('validateS3Key', () => {
     });
 
     it('throws with invalid filename', () => {
-      try {
+      expect(() => {
         validateS3Key.standupAudioRecording(
-          `${validType}/${validEntity}/${validEntityId}/${validDateKey}/${validUserId}/!@#$^&*.${validFileExtension}`
+          `${validType}/${validEntity}/${validEntityId}/${validDateKey}/${validUserId}/.${validFileExtension}`
         );
-      } catch (err) {
-        expect(err).toHaveProperty('message', errMsg);
-      }
+      }).toThrow(new Error(errMsg));
     });
 
     it('throws with invalid file extension', () => {
@@ -175,13 +173,11 @@ describe('validateS3Key', () => {
     });
 
     it('throws with invalid filename', () => {
-      try {
+      expect(() => {
         validateS3Key.standupTranscodedAudioRecording(
-          `${validType}/${validEntity}/${validEntityId}/${validDateKey}/${validUserId}/!@#$^&*.${validFileExtension}`
+          `${validType}/${validEntity}/${validEntityId}/${validDateKey}/${validUserId}/.${validFileExtension}`
         );
-      } catch (err) {
-        expect(err).toHaveProperty('message', errMsg);
-      }
+      }).toThrow(new Error(errMsg));
     });
 
     it('throws with invalid file extension', () => {
