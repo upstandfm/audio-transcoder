@@ -10,14 +10,14 @@ module.exports = {
    */
   standupAudioRecording(s3Key) {
     // A valid S3 key looks like:
-    // "audio/standups/:standupId/DD-MM-YYYY/:userId/:filename.webm"
+    // "audio/standups/:standupId/DD-MM-YYYY/:userId/:recordingId.webm"
     const isValid = /^audio\/standups\/.+\/\d\d?-\d\d?-\d\d\d\d\/.+\/.+\.webm/.test(
       s3Key
     );
 
     if (!isValid) {
       throw new Error(
-        'Invalid S3 key, format must be "audio/standups/:standupId/DD-MM-YYYY/:userId/:filename.webm"'
+        'Invalid S3 key, format must be "audio/standups/:standupId/DD-MM-YYYY/:userId/:recordingId.webm"'
       );
     }
   },
@@ -31,14 +31,14 @@ module.exports = {
    */
   standupTranscodedAudioRecording(s3Key) {
     // A valid S3 key looks like:
-    // "audio/standups/:standupId/DD-MM-YYYY/:userId/:filename.mp3"
+    // "audio/standups/:standupId/DD-MM-YYYY/:userId/:recordingId.mp3"
     const isValid = /^audio\/standups\/.+\/\d\d?-\d\d?-\d\d\d\d\/.+\/.+\.mp3/.test(
       s3Key
     );
 
     if (!isValid) {
       throw new Error(
-        'Invalid S3 key, format must be "audio/standups/:standupId/DD-MM-YYYY/:userId/:filename.mp3"'
+        'Invalid S3 key, format must be "audio/standups/:standupId/DD-MM-YYYY/:userId/:recordingId.mp3"'
       );
     }
   }

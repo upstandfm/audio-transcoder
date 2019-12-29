@@ -83,7 +83,7 @@ module.exports.ffmpegWebmToMp3 = async (event, context) => {
       const mp3Blob = ffmpeg.convertWebmToMp3(webmRecording.Body);
 
       // A valid S3 key will look like:
-      // "audio/standups/:standupId/DD-MM-YYYY/:userId/:filename.webm"
+      // "audio/standups/:standupId/DD-MM-YYYY/:userId/:recordingId.webm"
       const outputKey = s3Key.replace('webm', 'mp3');
 
       await recordings.putObject(
@@ -135,10 +135,17 @@ module.exports.createRecording = async (event, context) => {
 
       validateS3Key.standupAudioRecording(s3Key);
 
+      const metadata = await recordings.getMetadata(
+        s3Client,
+        S3_RECORDINGS_BUCKET_NAME,
+        s3Key
+      );
+
       await recordings.createItem(
         documentClient,
         DYNAMODB_STANDUPS_TABLE_NAME,
-        s3Key
+        s3Key,
+        metadata
       );
     });
   } catch (err) {

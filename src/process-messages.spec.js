@@ -38,7 +38,7 @@ const validS3Event = {
         },
         object: {
           key:
-            'audio/standups/polkjddUI/16-9-2019/auth0%skffk21dfkedked07810b069a/today.webm',
+            'audio/standups/polkjddUI/16-9-2019/auth0%skffk21dfkedked07810b069a/XQyaVFWe.webm',
           size: 32452,
           eTag: '8jfjdkf9wkdlkfe25f15',
           sequencer: 'DA7SDKWKDFOS09'
