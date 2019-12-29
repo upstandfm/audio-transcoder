@@ -12,7 +12,7 @@ provider:
   timeout: 3
   deploymentBucket:
     name: upstandfm-deployments
-    serverSideEncryption: AES256 # when using server-side encryption
+    serverSideEncryption: AES256
   environment:
     # Reuse TCP connection to reduce request latency
     # For more info see:
