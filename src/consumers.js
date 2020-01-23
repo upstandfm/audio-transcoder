@@ -10,7 +10,6 @@ const ffmpeg = require('./ffmpeg');
 const {
   S3_RECORDINGS_BUCKET_NAME,
   S3_TRANSCODED_RECORDINGS_BUCKET_NAME,
-  DYNAMODB_STANDUPS_TABLE_NAME,
   WORKSPACES_TABLE_NAME
 } = process.env;
 
@@ -88,7 +87,8 @@ module.exports.ffmpegWebmToMp3 = async (event, context) => {
         S3_TRANSCODED_RECORDINGS_BUCKET_NAME,
         outputKey,
         'audio/mpeg',
-        mp3Blob
+        mp3Blob,
+        webmRecording.Metadata
       );
     });
   } catch (err) {
@@ -138,6 +138,8 @@ module.exports.createRecording = async (event, context) => {
         s3Key
       );
 
+      // TODO: validate metadata
+
       await recordings.createItem(
         documentClient,
         WORKSPACES_TABLE_NAME,
@@ -151,8 +153,8 @@ module.exports.createRecording = async (event, context) => {
 };
 
 /**
- * Lambda SNS Topic subscriber that updates a recording item in DB when a new
- * transcoded audio recording is available.
+ * Lambda SNS Topic subscriber that updates a recording item in DB when an
+ * audio recording has been transcoded.
  *
  * The SNS Topic trigger is an S3 notification.
  *
@@ -166,7 +168,7 @@ module.exports.createRecording = async (event, context) => {
  * https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-context.html
  *
  */
-module.exports.updateRecordingStatusAndKey = async (event, context) => {
+module.exports.updateRecording = async (event, context) => {
   try {
     await processMessages.forEverySnsS3Record(event, async (err, s3) => {
       if (err) {
@@ -185,9 +187,18 @@ module.exports.updateRecordingStatusAndKey = async (event, context) => {
 
       validateS3Key.mp3Recording(s3Key);
 
+      const metadata = await recordings.getMetadata(
+        s3Client,
+        S3_TRANSCODED_RECORDINGS_BUCKET_NAME,
+        s3Key
+      );
+
+      // TODO: validate metadata
+
       await recordings.updateItemStatusAndKey(
         documentClient,
-        DYNAMODB_STANDUPS_TABLE_NAME,
+        WORKSPACES_TABLE_NAME,
+        metadata,
         s3Key
       );
     });
