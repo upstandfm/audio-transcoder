@@ -54,19 +54,21 @@ module.exports = {
    * @param {String} key - S3 storage key (i.e. the storage "path")
    * @param {String} mimeType
    * @param {Object} blob
+   * @param {Object} metadata - S3 object user-defined metadata
    *
    * @return {Promise} Resolves with S3 Object data
    *
    * For more information see:
    * https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#putObject-property
    */
-  putObject(client, bucketName, key, mimeType, blob) {
+  putObject(client, bucketName, key, mimeType, blob, metadata) {
     const params = {
       Bucket: bucketName,
       Key: key,
       ContentType: mimeType,
       Body: blob,
-      ServerSideEncryption: 'AES256'
+      ServerSideEncryption: 'AES256',
+      Metadata: metadata
     };
 
     return client.putObject(params).promise();
@@ -105,10 +107,11 @@ module.exports = {
   },
 
   /**
-   * Update a recording item status and key.
+   * Update a recording item.
    *
    * @param {Object} client - DynamoDB document client
-   * @param {String} tableName - Name of the DynamoDB Table
+   * @param {String} tableName
+   * @param {Object} metadata - S3 object user-defined metadata
    * @param {String} s3Key - S3 storage key (i.e. the storage "path")
    *
    * @return {Promise} Resolves with DynamoDB Object data
@@ -116,29 +119,24 @@ module.exports = {
    * For more information see:
    * https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#update-property
    */
-  updateItemStatusAndKey(client, tableName, s3Key) {
-    // A valid S3 key looks like:
-    // "audio/standups/:standupId/DD-MM-YYYY/:userId/:recordingId.mp3"
-    const [, , standupId, dateKey, userId, file] = s3Key.split('/');
-    const [recordingId] = file.split('.');
-
+  updateItemStatusAndKey(client, tableName, metadata, s3Key) {
     const params = {
       TableName: tableName,
       Key: {
-        pk: `standup#${standupId}`,
-        sk: `update#${dateKey}#user#${userId}#recording#${recordingId}`
+        pk: `workspace#${metadata.workspaceId}#standup#${metadata.standupId}`,
+        sk: `update#${metadata.date}#user#${metadata.userId}#recording#${metadata.recordingId}`
       },
       ExpressionAttributeNames: {
         '#ua': 'updatedAt',
-        '#s': 'status',
+        '#ts': 'transcodingStatus',
         '#k': 'transcodedFileKey'
       },
       ExpressionAttributeValues: {
-        ':ua': Date.now(),
-        ':s': 'completed',
+        ':ua': new Date().toISOString(),
+        ':ts': 'completed',
         ':k': s3Key
       },
-      UpdateExpression: 'set #ua = :ua, #s = :s, #k = :k'
+      UpdateExpression: 'set #ua = :ua, #ts = :ts, #k = :k'
     };
 
     return client.update(params).promise();

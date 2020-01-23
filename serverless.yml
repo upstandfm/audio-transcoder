@@ -32,13 +32,6 @@ provider:
               [':::', '${state:infra.transcodedRecordingsBucketArn}'],
           },
         ]
-    # The ARN has the format "arn:aws:dynamodb:::table/tableName"
-    # Splitting on "/" gives us the name
-    DYNAMODB_STANDUPS_TABLE_NAME:
-      'Fn::Select':
-        ['1', { 'Fn::Split': ['/', '${state:infra.standupsTableArn}'] }]
-    # The ARN has the format "arn:aws:dynamodb:::table/tableName"
-    # Splitting on "/" gives us the name
     WORKSPACES_TABLE_NAME:
       'Fn::Select':
         ['1', { 'Fn::Split': ['/', '${state:infra.workspacesTableArn}'] }]
@@ -58,11 +51,6 @@ provider:
       Resource:
         'Fn::Join':
           ['/', ['${state:infra.transcodedRecordingsBucketArn }', '*']]
-    - Effect: Allow
-      Action:
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-      Resource: ${state:infra.standupsTableArn}
     - Effect: Allow
       Action:
         - dynamodb:PutItem
@@ -92,8 +80,8 @@ functions:
     description: Creates a recording item in DB when a new audio recording was uploaded
     events:
       - sns: ${state:infra.newS3AudioRecordingTopicArn}
-  updateRecordingStatusAndKey:
-    handler: src/consumers.updateRecordingStatusAndKey
-    description: Updates a recording item in DB when a new transcoded audio recording is available
+  updateRecording:
+    handler: src/consumers.updateRecording
+    description: Updates a recording item in DB when an audio recording has been transcoded
     events:
       - sns: ${state:infra.newS3TranscodedAudioRecordingTopicArn}
