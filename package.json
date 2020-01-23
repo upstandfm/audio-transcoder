@@ -20,10 +20,7 @@
   },
   "homepage": "https://github.com/upstandfm/audio-transcoder#readme",
   "lint-staged": {
-    "src/**/*.{js,json,md}": [
-      "npm run lint:format",
-      "git add"
-    ]
+    "src/**/*.{js,json,md}": "npm run lint:format"
   },
   "husky": {
     "hooks": {
