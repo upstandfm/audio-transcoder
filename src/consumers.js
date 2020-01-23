@@ -67,7 +67,7 @@ module.exports.ffmpegWebmToMp3 = async (event, context) => {
         s3Key = decodeURIComponent(s3.object.key);
       }
 
-      validateS3Key.standupAudioRecording(s3Key);
+      validateS3Key.webmRecording(s3Key);
 
       const webmRecording = await recordings.getObject(
         s3Client,
@@ -133,7 +133,7 @@ module.exports.createRecording = async (event, context) => {
         s3Key = decodeURIComponent(s3.object.key);
       }
 
-      validateS3Key.standupAudioRecording(s3Key);
+      validateS3Key.webmRecording(s3Key);
 
       const metadata = await recordings.getMetadata(
         s3Client,
@@ -187,7 +187,7 @@ module.exports.updateRecordingStatusAndKey = async (event, context) => {
         s3Key = decodeURIComponent(s3.object.key);
       }
 
-      validateS3Key.standupTranscodedAudioRecording(s3Key);
+      validateS3Key.mp3Recording(s3Key);
 
       await recordings.updateItemStatusAndKey(
         documentClient,
