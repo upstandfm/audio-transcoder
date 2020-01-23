@@ -76,8 +76,7 @@ module.exports = {
    * Create a recording item.
    *
    * @param {Object} client - DynamoDB document client
-   * @param {String} tableName - Name of the DynamoDB Table
-   * @param {String} s3Key - S3 storage key (i.e. the storage "path")
+   * @param {String} tableName
    * @param {Object} metadata - S3 object user-defined metadata
    *
    * @return {Promise} Resolves with DynamoDB Object data
@@ -85,25 +84,19 @@ module.exports = {
    * For more information see:
    * https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#put-property
    */
-  createItem(client, tableName, s3Key, metadata = {}) {
-    // A valid S3 key looks like:
-    // "audio/standups/:standupId/DD-MM-YYYY/:userId/:recordingId.webm"
-    const [, , standupId, dateKey, userId, file] = s3Key.split('/');
-    const [recordingId] = file.split('.');
-
-    const now = Date.now();
+  createItem(client, tableName, metadata = {}) {
+    const now = new Date().toISOString();
     const params = {
       TableName: tableName,
       Item: {
-        pk: `standup#${standupId}`,
-        sk: `update#${dateKey}#user#${userId}#recording#${recordingId}`,
-        recordingId,
-        standupId,
-        userId,
-        name: metadata.name,
+        pk: `workspace#${metadata.workspaceId}#standup#${metadata.standupId}`,
+        sk: `update#${metadata.date}#user#${metadata.userId}#recording#${metadata.recordingId}`,
+        id: metadata.recordingId,
+        createdBy: metadata.userId,
         createdAt: now,
         updatedAt: now,
-        status: 'transcoding',
+        name: metadata.name,
+        transcodingStatus: 'transcoding',
         transcodedFileKey: ''
       }
     };

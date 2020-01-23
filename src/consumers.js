@@ -10,7 +10,8 @@ const ffmpeg = require('./ffmpeg');
 const {
   S3_RECORDINGS_BUCKET_NAME,
   S3_TRANSCODED_RECORDINGS_BUCKET_NAME,
-  DYNAMODB_STANDUPS_TABLE_NAME
+  DYNAMODB_STANDUPS_TABLE_NAME,
+  WORKSPACES_TABLE_NAME
 } = process.env;
 
 const s3Client = new S3();
@@ -35,7 +36,7 @@ function _handleError(context, err) {
 }
 
 /**
- * Lambda SNS Topic subscriber that transcodes a WebM audio recording to mp3
+ * Lambda SNS Topic subscriber that transcodes a WebM audio recording to MP3
  * using FFmpeg.
  *
  * The SNS Topic trigger is an S3 notification.
@@ -81,11 +82,7 @@ module.exports.ffmpegWebmToMp3 = async (event, context) => {
       }
 
       const mp3Blob = ffmpeg.convertWebmToMp3(webmRecording.Body);
-
-      // A valid S3 key will look like:
-      // "audio/standups/:standupId/DD-MM-YYYY/:userId/:recordingId.webm"
       const outputKey = s3Key.replace('webm', 'mp3');
-
       await recordings.putObject(
         s3Client,
         S3_TRANSCODED_RECORDINGS_BUCKET_NAME,
@@ -101,8 +98,8 @@ module.exports.ffmpegWebmToMp3 = async (event, context) => {
 };
 
 /**
- * Lambda SNS Topic subscriber that creates a recording item in DB when
- * a new audio recording is available.
+ * Lambda SNS Topic subscriber that creates a recording item in DB a new audio
+ * recording was uploaded.
  *
  * The SNS Topic trigger is an S3 notification.
  *
@@ -143,8 +140,7 @@ module.exports.createRecording = async (event, context) => {
 
       await recordings.createItem(
         documentClient,
-        DYNAMODB_STANDUPS_TABLE_NAME,
-        s3Key,
+        WORKSPACES_TABLE_NAME,
         metadata
       );
     });

@@ -37,6 +37,11 @@ provider:
     DYNAMODB_STANDUPS_TABLE_NAME:
       'Fn::Select':
         ['1', { 'Fn::Split': ['/', '${state:infra.standupsTableArn}'] }]
+    # The ARN has the format "arn:aws:dynamodb:::table/tableName"
+    # Splitting on "/" gives us the name
+    WORKSPACES_TABLE_NAME:
+      'Fn::Select':
+        ['1', { 'Fn::Split': ['/', '${state:infra.workspacesTableArn}'] }]
 
   # See: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_actions-resources-contextkeys.html
   iamRoleStatements:
@@ -58,11 +63,16 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
       Resource: ${state:infra.standupsTableArn}
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+      Resource: ${state:infra.workspacesTableArn}
 
 package:
   exclude:
     - ./*
-    - ./**/*.test.js
+    - ./**/*.spec.js
   include:
     - node_modules
     - src
@@ -72,14 +82,14 @@ functions:
     memorySize: 2048
     timeout: 10
     handler: src/consumers.ffmpegWebmToMp3
-    description: Transcodes a WebM audio recording to mp3 using FFmpeg
+    description: Transcodes a WebM audio recording to MP3 using FFmpeg
     events:
       - sns: ${state:infra.newS3AudioRecordingTopicArn}
     layers:
       - ${state:lambda-layers.ffmpegArn}
   createRecording:
     handler: src/consumers.createRecording
-    description: Creates a recording item in DB when a new audio recording is available
+    description: Creates a recording item in DB when a new audio recording was uploaded
     events:
       - sns: ${state:infra.newS3AudioRecordingTopicArn}
   updateRecordingStatusAndKey:
