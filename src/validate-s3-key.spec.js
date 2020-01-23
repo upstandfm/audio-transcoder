@@ -3,167 +3,131 @@
 const validateS3Key = require('./validate-s3-key');
 
 describe('validateS3Key', () => {
-  describe('standupAudioRecording(s3Key)', () => {
+  describe('webmRecording(s3Key)', () => {
     const validType = 'audio';
-    const validEntity = 'standups';
-    const validEntityId = 'J0W4Z1uE';
-    const validDateKey = '12-10-2019';
-    const validUserId = 'auth0|5d5582168c110c8f790bh89e';
+    const validWorkspaceId = 'z_1Edx5-p';
+    const validStandupId = 'J0W4Z1uE';
     const validRecordingId = 'XQyaVFWe';
     const validFileExtension = 'webm';
 
     const errMsg =
-      'Invalid S3 key, format must be "audio/standups/:standupId/DD-MM-YYYY/:userId/:recordingId.webm"';
+      'Invalid S3 key, format must be "audio/:workspaceId/:standupId/:recordingId.webm"';
 
     it('throws with no key', () => {
       expect(() => {
-        validateS3Key.standupAudioRecording();
+        validateS3Key.webmRecording();
       }).toThrow(new Error(errMsg));
     });
 
     it('throws with invalid type', () => {
       expect(() => {
-        validateS3Key.standupAudioRecording(
-          `image/${validEntity}/${validEntityId}/${validDateKey}/${validUserId}/${validRecordingId}.${validFileExtension}`
+        validateS3Key.webmRecording(
+          `image/${validWorkspaceId}/${validStandupId}/${validRecordingId}.${validFileExtension}`
         );
       }).toThrow(new Error(errMsg));
     });
 
-    it('throws with invalid entity', () => {
+    it('throws with invalid workspace ID', () => {
       expect(() => {
-        validateS3Key.standupAudioRecording(
-          `${validType}/books/${validEntityId}/${validDateKey}/${validUserId}/${validRecordingId}.${validFileExtension}`
+        validateS3Key.webmRecording(
+          `${validType}/.!*&^@$#/${validStandupId}/${validRecordingId}.${validFileExtension}`
         );
       }).toThrow(new Error(errMsg));
     });
 
-    it('throws with invalid entity ID', () => {
+    it('throws with invalid standup ID', () => {
       expect(() => {
-        validateS3Key.standupAudioRecording(
-          `${validType}/${validEntity}//${validDateKey}/${validUserId}/${validRecordingId}.${validFileExtension}`
-        );
-      }).toThrow(new Error(errMsg));
-    });
-
-    it('throws with invalid date key', () => {
-      expect(() => {
-        validateS3Key.standupAudioRecording(
-          `${validType}/${validEntity}/${validEntityId}/111-2222-3/${validUserId}/${validRecordingId}.${validFileExtension}`
-        );
-      }).toThrow(new Error(errMsg));
-    });
-
-    it('throws with invalid user ID', () => {
-      expect(() => {
-        validateS3Key.standupAudioRecording(
-          `${validType}/${validEntity}/${validEntityId}/${validDateKey}//${validRecordingId}.${validFileExtension}`
+        validateS3Key.webmRecording(
+          `${validType}/${validWorkspaceId}/%&$#*+(%/${validRecordingId}.${validFileExtension}`
         );
       }).toThrow(new Error(errMsg));
     });
 
     it('throws with invalid recording ID', () => {
       expect(() => {
-        validateS3Key.standupAudioRecording(
-          `${validType}/${validEntity}/${validEntityId}/${validDateKey}/${validUserId}/.${validFileExtension}`
+        validateS3Key.webmRecording(
+          `${validType}/${validWorkspaceId}/${validStandupId}/&#!()=,!.${validFileExtension}`
         );
       }).toThrow(new Error(errMsg));
     });
 
     it('throws with invalid file extension', () => {
       expect(() => {
-        validateS3Key.standupAudioRecording(
-          `${validType}/${validEntity}/${validEntityId}/${validDateKey}/${validUserId}/${validRecordingId}.mp4`
+        validateS3Key.webmRecording(
+          `${validType}/${validWorkspaceId}/${validStandupId}/${validRecordingId}.mp4`
         );
       }).toThrow(new Error(errMsg));
     });
 
     it('does not throw for valid key', () => {
       expect(() => {
-        validateS3Key.standupAudioRecording(
-          `${validType}/${validEntity}/${validEntityId}/${validDateKey}/${validUserId}/${validRecordingId}.${validFileExtension}`
+        validateS3Key.webmRecording(
+          `${validType}/${validWorkspaceId}/${validStandupId}/${validRecordingId}.${validFileExtension}`
         );
       }).not.toThrow(new Error(errMsg));
     });
   });
 
-  describe('standupTranscodedAudioRecording(s3Key)', () => {
+  describe('mp3Recording(s3Key)', () => {
     const validType = 'audio';
-    const validEntity = 'standups';
-    const validEntityId = 'J0W4Z1uE';
-    const validDateKey = '12-10-2019';
-    const validUserId = 'auth0|5d5582168c110c8f790bh89e';
-    const validRecordingId = 'today';
+    const validWorkspaceId = 'z_1Edx5-p';
+    const validStandupId = 'J0W4Z1uE';
+    const validRecordingId = 'XQyaVFWe';
     const validFileExtension = 'mp3';
 
     const errMsg =
-      'Invalid S3 key, format must be "audio/standups/:standupId/DD-MM-YYYY/:userId/:recordingId.mp3"';
+      'Invalid S3 key, format must be "audio/:workspaceId/:standupId/:recordingId.mp3"';
 
     it('throws with no key', () => {
       expect(() => {
-        validateS3Key.standupTranscodedAudioRecording();
+        validateS3Key.mp3Recording();
       }).toThrow(new Error(errMsg));
     });
 
     it('throws with invalid type', () => {
       expect(() => {
-        validateS3Key.standupTranscodedAudioRecording(
-          `image/${validEntity}/${validEntityId}/${validDateKey}/${validUserId}/${validRecordingId}.${validFileExtension}`
+        validateS3Key.mp3Recording(
+          `image/${validWorkspaceId}/${validStandupId}/${validRecordingId}.${validFileExtension}`
         );
       }).toThrow(new Error(errMsg));
     });
 
-    it('throws with invalid entity', () => {
+    it('throws with invalid workspace ID', () => {
       expect(() => {
-        validateS3Key.standupTranscodedAudioRecording(
-          `${validType}/books/${validEntityId}/${validDateKey}/${validUserId}/${validRecordingId}.${validFileExtension}`
+        validateS3Key.mp3Recording(
+          `${validType}/!@#$%^&*/${validStandupId}/${validRecordingId}.${validFileExtension}`
         );
       }).toThrow(new Error(errMsg));
     });
 
-    it('throws with invalid entity ID', () => {
+    it('throws with invalid standup ID', () => {
       expect(() => {
-        validateS3Key.standupTranscodedAudioRecording(
-          `${validType}/${validEntity}//${validDateKey}/${validUserId}/${validRecordingId}.${validFileExtension}`
-        );
-      }).toThrow(new Error(errMsg));
-    });
-
-    it('throws with invalid date key', () => {
-      expect(() => {
-        validateS3Key.standupTranscodedAudioRecording(
-          `${validType}/${validEntity}/${validEntityId}/111-2222-3/${validUserId}/${validRecordingId}.${validFileExtension}`
-        );
-      }).toThrow(new Error(errMsg));
-    });
-
-    it('throws with invalid user ID', () => {
-      expect(() => {
-        validateS3Key.standupTranscodedAudioRecording(
-          `${validType}/${validEntity}/${validEntityId}/${validDateKey}//${validRecordingId}.${validFileExtension}`
+        validateS3Key.mp3Recording(
+          `${validType}/${validWorkspaceId}/!@#$,+~*^/${validRecordingId}.${validFileExtension}`
         );
       }).toThrow(new Error(errMsg));
     });
 
     it('throws with invalid recording ID', () => {
       expect(() => {
-        validateS3Key.standupTranscodedAudioRecording(
-          `${validType}/${validEntity}/${validEntityId}/${validDateKey}/${validUserId}/.${validFileExtension}`
+        validateS3Key.mp3Recording(
+          `${validType}/${validWorkspaceId}/${validStandupId}/@%^$&!*+|!.${validFileExtension}`
         );
       }).toThrow(new Error(errMsg));
     });
 
     it('throws with invalid file extension', () => {
       expect(() => {
-        validateS3Key.standupTranscodedAudioRecording(
-          `${validType}/${validEntity}/${validEntityId}/${validDateKey}/${validUserId}/${validRecordingId}.mp4`
+        validateS3Key.mp3Recording(
+          `${validType}/${validWorkspaceId}/${validStandupId}/${validRecordingId}.mp4`
         );
       }).toThrow(new Error(errMsg));
     });
 
     it('does not throw for valid key', () => {
       expect(() => {
-        validateS3Key.standupTranscodedAudioRecording(
-          `${validType}/${validEntity}/${validEntityId}/${validDateKey}/${validUserId}/${validRecordingId}.${validFileExtension}`
+        validateS3Key.mp3Recording(
+          `${validType}/${validWorkspaceId}/${validStandupId}/${validRecordingId}.${validFileExtension}`
         );
       }).not.toThrow(new Error(errMsg));
     });
