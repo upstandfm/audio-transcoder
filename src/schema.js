@@ -11,7 +11,7 @@ const defaultJoi = Joi.defaults(_schema =>
 const _metadata = defaultJoi.object().keys({
   userId: Joi.string().required(),
 
-  // The IDs below consists of 7 to 14 URL friendly characters, for more info
+  // The IDs below consist of 7 to 14 URL friendly characters, for more info
   // see: https://github.com/dylang/shortid
   workspaceId: Joi.string()
     .regex(/^[a-zA-Z-0-9_-]{7,14}$/, 'workspaceId')
@@ -37,23 +37,17 @@ const _metadata = defaultJoi.object().keys({
     .max(70)
 });
 
-function _validate(data, schema) {
-  const { error, value } = schema.validate(data);
-
-  // For Joi "error" see:
-  // https://github.com/hapijs/joi/blob/master/API.md#validationerror
-  if (error) {
-    const err = new Error('Invalid request data');
-    err.statusCode = 400;
-    err.details = error.details.map(e => e.message);
-    throw err;
-  }
-
-  return value;
-}
-
 module.exports = {
   validateMetadata(data = {}) {
-    return _validate(data, _metadata);
+    const { schemaErr, value } = _metadata.validate(data);
+
+    // For Joi "schemaErr" see:
+    // https://github.com/hapijs/joi/blob/master/API.md#validationerror
+    if (schemaErr) {
+      const info = schemaErr.details.map(e => e.message).join(' ');
+      throw new Error(`Invalid Metadata: ${info}`);
+    }
+
+    return value;
   }
 };
