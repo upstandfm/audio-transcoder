@@ -38,5 +38,7 @@
     "prettier": "^1.19.1",
     "serverless": "^1.61.3"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@hapi/joi": "^17.1.0"
+  }
 }
