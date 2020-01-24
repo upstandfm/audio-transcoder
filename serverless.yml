@@ -46,6 +46,12 @@ provider:
         'Fn::Join': ['/', ['${state:infra.recordingsBucketArn}', '*']]
     - Effect: Allow
       Action:
+        - s3:GetObject
+      # MUST contain "/*" because resource type is "object"
+      Resource:
+        'Fn::Join': ['/', ['${state:infra.transcodedRecordingsBucketArn}', '*']]
+    - Effect: Allow
+      Action:
         - s3:PutObject
       # MUST contain "/*" because resource type is "object"
       Resource:
