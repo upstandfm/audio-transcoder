@@ -77,27 +77,43 @@ module.exports = {
   /**
    * Create a recording item.
    *
-   * @param {Object} client - DynamoDB document client
-   * @param {String} tableName
-   * @param {Object} metadata - S3 object user-defined metadata
+   * @param {Object} Options
+   *
+   * @param {Object} Options.client - DynamoDB document client
+   * @param {String} Options.tableName
+   * @param {String} Options.userId
+   * @param {String} Options.workspaceId
+   * @param {String} Options.standupId
+   * @param {String} Options.recordingId
+   * @param {String} Options.date - Date of format "YYYY-MM-DD"
+   * @param {String} Options.name
    *
    * @return {Promise} Resolves with DynamoDB Object data
    *
    * For more information see:
    * https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#put-property
    */
-  createItem(client, tableName, metadata = {}) {
+  createItem({
+    client,
+    tableName,
+    userId,
+    workspaceId,
+    standupId,
+    recordingId,
+    date,
+    name
+  }) {
     const now = new Date().toISOString();
     const params = {
       TableName: tableName,
       Item: {
-        pk: `workspace#${metadata.workspaceId}#standup#${metadata.standupId}`,
-        sk: `update#${metadata.date}#user#${metadata.userId}#recording#${metadata.recordingId}`,
-        id: metadata.recordingId,
-        createdBy: metadata.userId,
+        pk: `workspace#${workspaceId}#standup#${standupId}`,
+        sk: `update#${date}#user#${userId}#recording#${recordingId}`,
+        id: recordingId,
+        createdBy: userId,
         createdAt: now,
         updatedAt: now,
-        name: metadata.name,
+        name: name,
         transcodingStatus: 'transcoding',
         transcodedFileKey: ''
       }
@@ -109,22 +125,38 @@ module.exports = {
   /**
    * Update a recording item.
    *
-   * @param {Object} client - DynamoDB document client
-   * @param {String} tableName
-   * @param {Object} metadata - S3 object user-defined metadata
-   * @param {String} s3Key - S3 storage key (i.e. the storage "path")
+   * @param {Object} Options
+   *
+   * @param {Object} Options.client - DynamoDB document client
+   * @param {String} Options.tableName
+   * @param {String} Options.s3Key - S3 storage key (i.e. the storage "path")
+   * @param {String} Options.userId
+   * @param {String} Options.workspaceId
+   * @param {String} Options.standupId
+   * @param {String} Options.recordingId
+   * @param {String} Options.date - Date of format "YYYY-MM-DD"
+   * @param {String} Options.name
    *
    * @return {Promise} Resolves with DynamoDB Object data
    *
    * For more information see:
    * https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#update-property
    */
-  updateItem(client, tableName, metadata, s3Key) {
+  updateItem(
+    client,
+    tableName,
+    s3Key,
+    userId,
+    workspaceId,
+    standupId,
+    recordingId,
+    date
+  ) {
     const params = {
       TableName: tableName,
       Key: {
-        pk: `workspace#${metadata.workspaceId}#standup#${metadata.standupId}`,
-        sk: `update#${metadata.date}#user#${metadata.userId}#recording#${metadata.recordingId}`
+        pk: `workspace#${workspaceId}#standup#${standupId}`,
+        sk: `update#${date}#user#${userId}#recording#${recordingId}`
       },
       ExpressionAttributeNames: {
         '#ua': 'updatedAt',

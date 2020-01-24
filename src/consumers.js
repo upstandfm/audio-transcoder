@@ -152,11 +152,16 @@ module.exports.createRecording = async (event, context) => {
         return;
       }
 
-      await recordings.createItem(
-        documentClient,
-        WORKSPACES_TABLE_NAME,
-        metadata
-      );
+      await recordings.createItem({
+        client: documentClient,
+        tableName: WORKSPACES_TABLE_NAME,
+        userId: metadata['user-id'],
+        workspaceId: metadata['workspace-id'],
+        standupId: metadata['standup-id'],
+        recordingId: metadata['recording-id'],
+        date: metadata.date,
+        name: metadata.name
+      });
     });
   } catch (err) {
     // Failed to create recording item
@@ -211,12 +216,16 @@ module.exports.updateRecording = async (event, context) => {
         return;
       }
 
-      await recordings.updateItem(
-        documentClient,
-        WORKSPACES_TABLE_NAME,
-        metadata,
-        s3Key
-      );
+      await recordings.updateItem({
+        client: documentClient,
+        tableName: WORKSPACES_TABLE_NAME,
+        s3Key,
+        userId: metadata['user-id'],
+        workspaceId: metadata['workspace-id'],
+        standupId: metadata['standup-id'],
+        recordingId: metadata['recording-id'],
+        date: metadata.date
+      });
     });
   } catch (err) {
     // Failed to update recording item status + key

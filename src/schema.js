@@ -9,17 +9,17 @@ const defaultJoi = Joi.defaults(_schema =>
 );
 
 const _metadata = defaultJoi.object().keys({
-  userId: Joi.string().required(),
+  'user-id': Joi.string().required(),
 
   // The IDs below consist of 7 to 14 URL friendly characters, for more info
   // see: https://github.com/dylang/shortid
-  workspaceId: Joi.string()
+  'workspace-id': Joi.string()
     .regex(/^[a-zA-Z-0-9_-]{7,14}$/, 'workspaceId')
     .required(),
-  standupId: Joi.string()
+  'standup-id': Joi.string()
     .regex(/^[a-zA-Z-0-9_-]{7,14}$/, 'standupId')
     .required(),
-  recordingId: Joi.string()
+  'recording-id': Joi.string()
     .regex(/^[a-zA-Z-0-9_-]{7,14}$/, 'recordingId')
     .required(),
 
