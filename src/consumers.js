@@ -3,7 +3,7 @@
 const S3 = require('aws-sdk/clients/s3');
 const DynamoDB = require('aws-sdk/clients/dynamodb');
 const processMessages = require('./process-messages');
-const validateS3Key = require('./validate-s3-key');
+const schema = require('./schema');
 const recordings = require('./recordings');
 const ffmpeg = require('./ffmpeg');
 
@@ -67,8 +67,6 @@ module.exports.ffmpegWebmToMp3 = async (event, context) => {
         s3Key = decodeURIComponent(s3.object.key);
       }
 
-      validateS3Key.webmRecording(s3Key);
-
       const webmRecording = await recordings.getObject(
         s3Client,
         S3_RECORDINGS_BUCKET_NAME,
@@ -76,7 +74,17 @@ module.exports.ffmpegWebmToMp3 = async (event, context) => {
       );
 
       if (!webmRecording || !webmRecording.Body) {
-        console.log('No recording object found for key: ', s3Key);
+        // When there's no recording data, we stop processing this SNS record
+        const err = new Error(`No audio data for key "${s3Key}"`);
+        _handleError(context, err);
+        return;
+      }
+
+      try {
+        schema.validateMetadata(webmRecording.Metadata);
+      } catch (err) {
+        // When the metadata is invalid, we stop processing this SNS record
+        _handleError(context, err);
         return;
       }
 
@@ -130,15 +138,19 @@ module.exports.createRecording = async (event, context) => {
         s3Key = decodeURIComponent(s3.object.key);
       }
 
-      validateS3Key.webmRecording(s3Key);
-
       const metadata = await recordings.getMetadata(
         s3Client,
         S3_RECORDINGS_BUCKET_NAME,
         s3Key
       );
 
-      // TODO: validate metadata
+      try {
+        schema.validateMetadata(metadata);
+      } catch (err) {
+        // When the metadata is invalid, we stop processing this SNS record
+        _handleError(context, err);
+        return;
+      }
 
       await recordings.createItem(
         documentClient,
@@ -185,17 +197,21 @@ module.exports.updateRecording = async (event, context) => {
         s3Key = decodeURIComponent(s3.object.key);
       }
 
-      validateS3Key.mp3Recording(s3Key);
-
       const metadata = await recordings.getMetadata(
         s3Client,
         S3_TRANSCODED_RECORDINGS_BUCKET_NAME,
         s3Key
       );
 
-      // TODO: validate metadata
+      try {
+        schema.validateMetadata(metadata);
+      } catch (err) {
+        // When the metadata is invalid, we stop processing this SNS record
+        _handleError(context, err);
+        return;
+      }
 
-      await recordings.updateItemStatusAndKey(
+      await recordings.updateItem(
         documentClient,
         WORKSPACES_TABLE_NAME,
         metadata,

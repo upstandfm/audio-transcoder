@@ -119,7 +119,7 @@ module.exports = {
    * For more information see:
    * https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#update-property
    */
-  updateItemStatusAndKey(client, tableName, metadata, s3Key) {
+  updateItem(client, tableName, metadata, s3Key) {
     const params = {
       TableName: tableName,
       Key: {
