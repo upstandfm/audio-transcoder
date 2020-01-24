@@ -14,13 +14,13 @@ const _metadata = defaultJoi.object().keys({
   // The IDs below consist of 7 to 14 URL friendly characters, for more info
   // see: https://github.com/dylang/shortid
   'workspace-id': Joi.string()
-    .regex(/^[a-zA-Z-0-9_-]{7,14}$/, 'workspaceId')
+    .regex(/^[a-zA-Z-0-9_-]{7,14}$/, 'workspace-id')
     .required(),
   'standup-id': Joi.string()
-    .regex(/^[a-zA-Z-0-9_-]{7,14}$/, 'standupId')
+    .regex(/^[a-zA-Z-0-9_-]{7,14}$/, 'standup-id')
     .required(),
   'recording-id': Joi.string()
-    .regex(/^[a-zA-Z-0-9_-]{7,14}$/, 'recordingId')
+    .regex(/^[a-zA-Z-0-9_-]{7,14}$/, 'recording-id')
     .required(),
 
   // A valid date has format "YYYY-MM-DD"
@@ -45,7 +45,7 @@ module.exports = {
     // https://github.com/hapijs/joi/blob/master/API.md#validationerror
     if (schemaErr) {
       const info = schemaErr.details.map(e => e.message).join(' ');
-      throw new Error(`Invalid Metadata: ${info}`);
+      throw new Error(`Invalid metadata ${info}`);
     }
 
     return value;
