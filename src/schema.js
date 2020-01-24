@@ -39,7 +39,7 @@ const _metadata = defaultJoi.object().keys({
 
 module.exports = {
   validateMetadata(data = {}) {
-    const { schemaErr, value } = _metadata.validate(data);
+    const { error: schemaErr, value } = _metadata.validate(data);
 
     // For Joi "schemaErr" see:
     // https://github.com/hapijs/joi/blob/master/API.md#validationerror
