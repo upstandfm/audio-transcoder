@@ -39,6 +39,7 @@
     "serverless": "^1.62.0"
   },
   "dependencies": {
-    "@hapi/joi": "^17.1.0"
+    "@hapi/joi": "^17.1.0",
+    "aws-sdk": "^2.638.0"
   }
 }
