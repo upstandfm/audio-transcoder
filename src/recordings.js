@@ -83,7 +83,7 @@ module.exports = {
    * @param {String} Options.tableName
    * @param {String} Options.userId
    * @param {String} Options.workspaceId
-   * @param {String} Options.standupId
+   * @param {String} Options.channelId
    * @param {String} Options.recordingId
    * @param {String} Options.date - Date of format "YYYY-MM-DD"
    * @param {String} Options.name
@@ -98,7 +98,7 @@ module.exports = {
     tableName,
     userId,
     workspaceId,
-    standupId,
+    channelId,
     recordingId,
     date,
     name
@@ -107,8 +107,8 @@ module.exports = {
     const params = {
       TableName: tableName,
       Item: {
-        pk: `workspace#${workspaceId}#standup#${standupId}`,
-        sk: `update#${date}#user#${userId}#recording#${recordingId}`,
+        pk: `workspace#${workspaceId}#channel#${channelId}`,
+        sk: `recording#${date}#user#${userId}#id#${recordingId}`,
         id: recordingId,
         createdBy: userId,
         createdAt: now,
@@ -132,7 +132,7 @@ module.exports = {
    * @param {String} Options.s3Key - S3 storage key (i.e. the storage "path")
    * @param {String} Options.userId
    * @param {String} Options.workspaceId
-   * @param {String} Options.standupId
+   * @param {String} Options.channelId
    * @param {String} Options.recordingId
    * @param {String} Options.date - Date of format "YYYY-MM-DD"
    * @param {String} Options.name
@@ -148,15 +148,15 @@ module.exports = {
     s3Key,
     userId,
     workspaceId,
-    standupId,
+    channelId,
     recordingId,
     date
   }) {
     const params = {
       TableName: tableName,
       Key: {
-        pk: `workspace#${workspaceId}#standup#${standupId}`,
-        sk: `update#${date}#user#${userId}#recording#${recordingId}`
+        pk: `workspace#${workspaceId}#channel#${channelId}`,
+        sk: `recording#${date}#user#${userId}#id#${recordingId}`
       },
       ExpressionAttributeNames: {
         '#ua': 'updatedAt',

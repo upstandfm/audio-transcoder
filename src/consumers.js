@@ -157,7 +157,7 @@ module.exports.createRecording = async (event, context) => {
         tableName: WORKSPACES_TABLE_NAME,
         userId: metadata['user-id'],
         workspaceId: metadata['workspace-id'],
-        standupId: metadata['standup-id'],
+        channelId: metadata['channel-id'],
         recordingId: metadata['recording-id'],
         date: metadata.date,
         name: metadata.name
@@ -222,7 +222,7 @@ module.exports.updateRecording = async (event, context) => {
         s3Key,
         userId: metadata['user-id'],
         workspaceId: metadata['workspace-id'],
-        standupId: metadata['standup-id'],
+        channelId: metadata['channel-id'],
         recordingId: metadata['recording-id'],
         date: metadata.date
       });

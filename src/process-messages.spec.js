@@ -37,8 +37,7 @@ const validS3Event = {
           arn: 'arn:aws:s3:::upstandfm-recordings'
         },
         object: {
-          key:
-            'audio/standups/polkjddUI/16-9-2019/auth0%skffk21dfkedked07810b069a/XQyaVFWe.webm',
+          key: 'audio/2wQ3xS/polkjUI/QyaVFWe.webm',
           size: 32452,
           eTag: '8jfjdkf9wkdlkfe25f15',
           sequencer: 'DA7SDKWKDFOS09'

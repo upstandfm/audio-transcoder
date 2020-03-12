@@ -16,8 +16,8 @@ const _metadata = defaultJoi.object().keys({
   'workspace-id': Joi.string()
     .regex(/^[a-zA-Z-0-9_-]{7,14}$/, 'workspace-id')
     .required(),
-  'standup-id': Joi.string()
-    .regex(/^[a-zA-Z-0-9_-]{7,14}$/, 'standup-id')
+  'channel-id': Joi.string()
+    .regex(/^[a-zA-Z-0-9_-]{7,14}$/, 'channel-id')
     .required(),
   'recording-id': Joi.string()
     .regex(/^[a-zA-Z-0-9_-]{7,14}$/, 'recording-id')
