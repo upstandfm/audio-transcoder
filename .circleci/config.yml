@@ -39,7 +39,7 @@ jobs:
       - checkout
       - run:
           name: Audit dependencies
-          command: npm audit
+          command: npm audit --production
 
   deps:
     <<: *docker_image
